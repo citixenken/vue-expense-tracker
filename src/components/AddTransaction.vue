@@ -24,6 +24,7 @@
 import { ref } from "vue";
 import { useToast } from "vue-toastification";
 
+const emit = defineEmits(["transactionSubmitted"]);
 const toast = useToast();
 
 const text = ref("");
@@ -34,7 +35,22 @@ const onSubmit = () => {
     toast.error("Both fields are required!");
     return;
   }
-  console.log(text.value, amount.value);
+
+  const parsedAmount = parseFloat(amount.value);
+  if (
+    Number.isNaN(parsedAmount) ||
+    !/^\s*(\-|\+)?(\d+(\.\d+)?|Infinity)\s*$/.test(amount.value)
+  ) {
+    toast.error("Amount must be a number!");
+    return;
+  }
+
+  const transactionData = {
+    text: text.value,
+    amount: parseFloat(parsedAmount),
+  };
+
+  emit("transactionSubmitted", transactionData);
 
   text.value = "";
   amount.value = "";
